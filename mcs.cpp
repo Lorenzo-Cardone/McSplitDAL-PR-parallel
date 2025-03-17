@@ -352,6 +352,8 @@ solve(const Graph &g0, const Graph &g1, Rewards &rewards, vector<VtxPair> &incum
 
                 if (bd_idx == -1) {
                     // In the MCCS case, there may be nothing we can branch on
+                    delete steps.back();
+                    steps.pop_back();
                     continue;
                 }
 

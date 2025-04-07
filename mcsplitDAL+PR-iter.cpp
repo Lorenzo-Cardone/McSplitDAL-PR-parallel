@@ -411,8 +411,11 @@ int main(int argc, char **argv) {
 
     cout << endl;
 
+    cout << "Solution size               " << solution.size() << std::endl;
     cout << "Nodes:                      " << stats->nodes << endl;
     cout << "Cut branches:               " << stats->cutbranches << endl;
+    cout << "   Total depth:             " << stats->total_cut_depth << endl;
+    cout << "   Avg depth:               " << (double)stats->total_cut_depth / (double)stats->cutbranches << endl;
     cout << "Conflicts:                  " << stats->conflicts << endl;
     printf("CPU time (ms):               %15ld\n", time_elapsed * 1000 / CLOCKS_PER_SEC);
     printf("FindBest time (ms):          %15ld\n", time_find * 1000 / CLOCKS_PER_SEC);

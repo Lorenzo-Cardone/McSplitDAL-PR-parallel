@@ -334,6 +334,7 @@ solve(const Graph &g0, const Graph &g1, Rewards &rewards, vector<VtxPair> &incum
                 int bound = (int) (*s->current).size() + calc_bound((*s->domains));
                 // cout << stats->nodes << ": bound = " << bound << "\tincumbent = " << incumbent.size() << "\tcurrent = " << s->current.size() << endl;
                 if (bound <= (int) incumbent.size() || bound < (int) matching_size_goal) {
+                    stats->total_cut_depth += (*s->current).size();
                     delete steps.back();
                     steps.pop_back();
                     // If I am the first thread, set the block_size

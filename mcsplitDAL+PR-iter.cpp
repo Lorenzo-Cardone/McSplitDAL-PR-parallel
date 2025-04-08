@@ -416,6 +416,13 @@ int main(int argc, char **argv) {
     cout << "Cut branches:               " << stats->cutbranches << endl;
     cout << "   Total depth:             " << stats->total_cut_depth << endl;
     cout << "   Avg depth:               " << (double)stats->total_cut_depth / (double)stats->cutbranches << endl;
+    cout << "   Total depth bb:          " << stats->total_cut_depth_before_best << endl;
+    cout << "   Avg depth bb:            " << (double)stats->total_cut_depth_before_best / (double)stats->bestcount << endl;
+    cout << "   Total bound reduction:   " << stats->total_bound_reduction << endl;
+    cout << "   Avg bound reduction:     " << (double)stats->total_bound_reduction / (double)stats->nodes << endl;
+    cout << "   Total bound reduction bb " << stats->total_bound_reduction_before_best << endl;
+    cout << "   Avg bound reduction bb:  " << (double)stats->total_bound_reduction_before_best / (double)stats->bestnodes << endl;
+    cout << "   Percent bds explored:    " << stats->percent_bds_explored << endl;
     cout << "Conflicts:                  " << stats->conflicts << endl;
     printf("CPU time (ms):               %15ld\n", time_elapsed * 1000 / CLOCKS_PER_SEC);
     printf("FindBest time (ms):          %15ld\n", time_find * 1000 / CLOCKS_PER_SEC);

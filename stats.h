@@ -16,8 +16,11 @@ typedef struct Stats {
     int sleeping_threads = 0;
     bool swapped_graphs = false;
 
+    unsigned long long total_cut_depth_before_best{0};
     unsigned long long total_cut_depth{0};
+    unsigned long long total_bound_reduction_before_best{0};
     unsigned long long total_bound_reduction{0};
+    double percent_bds_explored{0.0};
 } Stats;
 
 #endif //MCSPLITDAL_STATS_H

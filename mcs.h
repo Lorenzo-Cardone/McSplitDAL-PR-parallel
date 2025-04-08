@@ -50,6 +50,17 @@ struct Step {
     int bd_idx;
     int v;
     vector<VtxPair> *current;
+    int bound;
+    int tot_bds_explorable_size;
+    int cur_bds_explored_size;
+    
+    int compute_explorable_size (const vector<Bidomain> &domains) {
+        int size = 0;
+        for (const Bidomain &bd: domains) {
+            size += bd.left.size() * bd.right.size();
+        }
+        return size;
+    }
 
     Step(vector<Bidomain> *domains, int w_iter, int v, vector<VtxPair> *current) {
         this->wselected = unordered_set<int>();
@@ -59,6 +70,8 @@ struct Step {
         this->current = current;
         this->bd = nullptr;
         this->bd_idx = -1;
+        this->tot_bds_explorable_size = compute_explorable_size(*domains);
+        this->cur_bds_explored_size = 0;
     };
 
     ~Step() {

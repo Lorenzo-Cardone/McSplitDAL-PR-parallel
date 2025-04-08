@@ -323,6 +323,28 @@ solve(const Graph &g0, const Graph &g1, Rewards &rewards, vector<VtxPair> &incum
                     stats->bestcount = stats->cutbranches + 1;
                     stats->bestnodes = stats->nodes;
                     stats->bestfind = clock();
+                    stats->total_cut_depth_before_best = stats->total_cut_depth;
+                    stats->total_bound_reduction_before_best = stats->total_bound_reduction;
+                    stats->percent_bds_explored = 0.0;
+                    if (steps.size() > 1) {
+                        auto iter = steps.end();
+                        iter --; // remove the last step
+                        double prev_perc = 1.0;
+                        while (iter -- != steps.begin()) {
+                            double cur_step_perc = (1.0 / (double) (*iter)->tot_bds_explorable_size) * prev_perc;
+                            double perc = (double) ((*iter)->cur_bds_explored_size - 1) / (double) (*iter)->tot_bds_explorable_size;
+                            prev_perc = cur_step_perc + perc;
+                            //cout << "\tpperc: " << prev_perc << " | " << (*iter)->cur_bds_explored_size << " - " << (*iter)->tot_bds_explorable_size << " | ( " << (*(++iter))->current->back().v << " - " << (*(iter--))->current->back().w << " ) " << endl;
+                        }
+                        stats->percent_bds_explored = prev_perc;
+                        //cout << "perc: " << stats->percent_bds_explored << endl;
+                        cout << "\tSol size:                " << incumbent.size() << endl;
+                        cout << "\tNodes:                   " << stats->nodes << endl;
+                        cout << "\tPruned branches:         " << stats->cutbranches + 1 << endl;
+                        cout << "\tTot pruning depth:       " << stats->total_cut_depth_before_best << endl;
+                        cout << "\tTot bound reduction:     " << stats->total_bound_reduction << endl;
+                        cout << "\tPerc bds explored:       " << stats->percent_bds_explored << endl;
+                    }
 
                     unique_lock rlk(reward_mutex); // NB Check possible deadlock/Starvation!
                     rewards.update_policy_counter(true);
@@ -332,6 +354,14 @@ solve(const Graph &g0, const Graph &g1, Rewards &rewards, vector<VtxPair> &incum
 
                 // Prune the branch if the upper bound is too small
                 int bound = (int) (*s->current).size() + calc_bound((*s->domains));
+                s->bound = bound;
+                int previous_bound = (g0.n < g1.n) ? g0.n : g1.n;
+                if (steps.size() > 1) {
+                    auto iter = steps.end();
+                    iter--;
+                    iter--;
+                }
+                stats->total_bound_reduction += previous_bound - s->bound;
                 // cout << stats->nodes << ": bound = " << bound << "\tincumbent = " << incumbent.size() << "\tcurrent = " << s->current.size() << endl;
                 if (bound <= (int) incumbent.size() || bound < (int) matching_size_goal) {
                     stats->total_cut_depth += (*s->current).size();
@@ -388,6 +418,8 @@ solve(const Graph &g0, const Graph &g1, Rewards &rewards, vector<VtxPair> &incum
                 // cout << "W enter " << std::chrono::duration<double>(end - t).count() << endl;
                 // t = end;
                 int w = selectW_index(g0, g1, s->current, s->bd, rewards, s->v, s->wselected);
+                s->cur_bds_explored_size ++;
+                //cout << "cur: " << s->cur_bds_explored_size << " / " << s->tot_bds_explorable_size << endl;
                 // end = std::chrono::high_resolution_clock::now();
                 // cout << "W index " << std::chrono::duration<double>(end - t).count() << endl;
                 // t = end;

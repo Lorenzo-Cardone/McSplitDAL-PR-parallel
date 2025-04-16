@@ -75,6 +75,8 @@ EXTERN struct arguments {
     bool random_start;
     Heuristic heuristic;
     SortHeuristic::Base *sort_heuristic;
+    bool reverse_sort;
+    bool inverse_sort;
     bool initialize_rewards;
     MCS mcs_method;
     char *filename1;

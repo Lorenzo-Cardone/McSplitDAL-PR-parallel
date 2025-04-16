@@ -39,6 +39,8 @@ static struct argp_option options[] = {
         {"random_start",         'r', 0,                   0, "Set random start to true"},
         {"dal_reward_policy",    'D', "dal_reward_policy", 0, "Specify the dal reward policy (num, max, avg)"},
         {"sort_heuristic",       's', "sort_heuristic",    0, "Specify the sort heuristic (degree, pagerank, betweenness, closeness, clustering, katz)"},
+        {"reverse_sorting",      'e', 0,                   0, "Specify the reverse sorting (true, false)"},
+        {"inverse_sorting",      'E', 0,                   0, "Specify the inverse sorting (true, false)"},
         {"pruning",              'P', 0,                   0, "Specify if the first thread goes on until pruning or not, before pushing to global queue"},
         {0}};
 
@@ -63,6 +65,8 @@ void set_default_arguments() {
     arguments.random_start = false;
     arguments.arg_num = 0;
     arguments.sort_heuristic = new SortHeuristic::Degree();
+    arguments.reverse_sort = false;
+    arguments.inverse_sort = false;
     arguments.initialize_rewards = false; // if false, rewards are initialized to 0, else to sort_heuristic
     arguments.mcs_method = RL_DAL;
     arguments.swap_policy = McSPLIT_SD;
@@ -163,6 +167,16 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                 arguments.sort_heuristic = new SortHeuristic::KatzCentrality();
             else
                 fail("Unknown sort heuristic (try degree, pagerank, betweenness, closeness, clustering, katz)");
+            break;
+        case 'e':
+            if (arguments.inverse_sort)
+                fail("The -e and -E options can't be used together.");
+            arguments.reverse_sort = true;
+            break;
+        case 'E':
+            if (arguments.reverse_sort)
+                fail("The -e and -E options can't be used together.");
+            arguments.inverse_sort = true;
             break;
         case ARGP_KEY_ARG:
             if (arguments.arg_num == 0) {
@@ -329,12 +343,18 @@ int main(int argc, char **argv) {
     vector<int> vv0(g0.n);
     std::iota(std::begin(vv0), std::end(vv0), 0);
     bool g1_dense = false; //sum(g1_deg) > g1.n * (g1.n - 1);
+    if (arguments.reverse_sort) {
+        g1_dense = !g1_dense;
+    }
     std::stable_sort(std::begin(vv0), std::end(vv0),
                      [&](int a, int b) { return g1_dense ? (g0_deg[a] < g0_deg[b]) : (g0_deg[a] > g0_deg[b]); });
 
     vector<int> vv1(g1.n);
     std::iota(std::begin(vv1), std::end(vv1), 0);
     bool g0_dense = false; //sum(g0_deg) > g0.n * (g0.n - 1);
+    if (arguments.reverse_sort || arguments.inverse_sort) {
+        g0_dense = !g0_dense;
+    }
     std::stable_sort(std::begin(vv1), std::end(vv1),
                      [&](int a, int b) { //????????????????????????????????????????????????????
                          return g0_dense ? (g1_deg[a] < g1_deg[b]) : (g1_deg[a] > g1_deg[b]);

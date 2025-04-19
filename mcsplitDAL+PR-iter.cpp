@@ -182,6 +182,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             if (arguments.arg_num == 0) {
                 if (std::string(arg) == "min_max")
                     arguments.heuristic = min_max;
+                else if (std::string(arg) == "min_max_deg")
+                    arguments.heuristic = min_max_deg;
                 else if (std::string(arg) == "min_product")
                     arguments.heuristic = min_product;
                 else if (std::string(arg) == "rewards_based")

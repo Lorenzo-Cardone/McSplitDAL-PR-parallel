@@ -53,8 +53,23 @@ int selectV_index(const Bidomain *bd, const Rewards &rewards) {
     return best_vtx;
 }
 
+int select_maxDeg_index(const Bidomain &bd, const Graph &g) {
+    int max_deg = -1;
+    int best_vtx = INT_MAX;
+    for (int vtx: bd.left) {
+        if (g.adjlist[vtx].adjNodes.size() > max_deg) {
+            best_vtx = vtx;
+            max_deg = g.adjlist[vtx].adjNodes.size();
+        } else if (g.adjlist[vtx].adjNodes.size() == max_deg) {
+            if (vtx < best_vtx) {
+                best_vtx = vtx;
+            }
+        }
+    }
+}
+
 int select_bidomain(const vector<Bidomain> &domains, const Rewards &rewards,
-                    int current_matching_size) {
+                    int current_matching_size, const Graph &g) {
     // Select the bidomain with the smallest max(leftsize, rightsize), breaking
     // ties on the smallest vertex index in the left set
     int min_size = INT_MAX;
@@ -89,14 +104,19 @@ int select_bidomain(const vector<Bidomain> &domains, const Rewards &rewards,
                     current += vtx;
                 }
             } else
-                current = arguments.heuristic == min_max ? std::max((int) bd.left.size(), (int) bd.right.size()) :
+                current = (arguments.heuristic == min_max || arguments.heuristic == min_max_deg) ? std::max((int) bd.left.size(), (int) bd.right.size()) :
                           (int) bd.left.size() * (int) bd.right.size();
             if (current < min_size) {
                 min_size = current;
                 min_tie_breaker = selectV_index(&bd, rewards);
                 best = i;
             } else if (current == min_size) {
-                tie_breaker = selectV_index(&bd, rewards);
+                if (arguments.heuristic == min_max_deg) {
+                    tie_breaker = select_maxDeg_index(bd, g);
+                }
+                else {
+                    tie_breaker = selectV_index(&bd, rewards);
+                }
                 if (tie_breaker < min_tie_breaker) {
                     min_tie_breaker = tie_breaker;
                     best = i;
@@ -376,7 +396,7 @@ solve(const Graph &g0, const Graph &g1, Rewards &rewards, vector<VtxPair> &incum
                 }
 
                 // Select a bidomain based on the heuristic
-                int bd_idx = select_bidomain((*s->domains), rewards, (int) (*s->current).size());
+                int bd_idx = select_bidomain((*s->domains), rewards, (int) (*s->current).size(), g1);
                 // end = std::chrono::high_resolution_clock::now();
                 // cout << "V select domain " << std::chrono::duration<double>(end - t).count() << endl;
                 // t = end;

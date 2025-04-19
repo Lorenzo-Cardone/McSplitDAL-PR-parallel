@@ -18,6 +18,7 @@ enum SwapPolicy {
 
 enum Heuristic {
     min_max,
+    min_max_deg,
     min_product,
     rewards_based,
     heuristic_based

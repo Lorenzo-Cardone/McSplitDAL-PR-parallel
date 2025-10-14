@@ -3,6 +3,8 @@ McSplit-DAL is an enhanced version of the McSplit algorithm for maximum common s
 
 For reference, the previous version called McSplit+LL from the DAL authors is available at [https://github.com/JHL-HUST/McSplit-LL](https://github.com/JHL-HUST/McSplit-LL). Although heavily modified, portions of the source code might have some overlapping.
 
+> **Warning:** The parallel option (`--threads` or `-p`) is currently not functional in this branch. Running with multiple threads may lead to non maximal solutions.
+
 ## Usage
 Usage: mcs_dal_circuit [OPTION...] HEURISTIC FILENAME1 FILENAME2
 

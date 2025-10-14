@@ -19,7 +19,7 @@ static void fail(std::string msg) {
                              Command-line arguments
 *******************************************************************************/
 
-static char doc[] = "Find a maximum clique in a graph in DIMACS format\vHEURISTIC can be min_max or min_product or rewards_based or heuristic_based";
+static char doc[] = "Find a maximum clique in a graph in DIMACS format\vHEURISTIC can be min_max or min_max_deg or min_product or rewards_based or heuristic_based";
 static char args_doc[] = "HEURISTIC FILENAME1 FILENAME2";
 static struct argp_option options[] = {
         {"quiet",                'q', 0,                   0, "Quiet output"},

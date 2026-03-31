@@ -33,8 +33,8 @@ namespace SortHeuristic {
                     stochastic_g[i][j] = 1.0f / (float) g.n;
                 }
             } else {
-                for (auto &w: g.adjlist[i].adjNodes) {
-                    stochastic_g[i][w.id] = 1.0f / (float) out_links[i];
+                for (auto w: g.adjlist[i].adjNodes) {
+                    stochastic_g[i][w] = 1.0f / (float) out_links[i];
                 }
             }
         }
@@ -88,9 +88,9 @@ namespace SortHeuristic {
             }
             int num_triangles = 0;
             for (int j = 0; j < degree; j++) {
-                int v = g.adjlist[i].adjNodes[j].id;
+                int v = g.adjlist[i].adjNodes[j];
                 for (int k = j + 1; k < degree; k++) {
-                    if (g.get(v, g.adjlist[i].adjNodes[k].id) == 1) {
+                    if (g.get(v, g.adjlist[i].adjNodes[k]) == 1) {
                         num_triangles++;
                     }
                 }
@@ -116,10 +116,10 @@ namespace SortHeuristic {
                 current_layer = next_layer;
                 next_layer.clear();
                 for (auto &v: current_layer) {
-                    for (auto &w: g.adjlist[v].adjNodes) {
-                        if (visited[w.id] == 0) {
-                            score[w.id] += score[v] * alpha;
-                            next_layer.insert(w.id);
+                    for (auto w: g.adjlist[v].adjNodes) {
+                        if (visited[w] == 0) {
+                            score[w] += score[v] * alpha;
+                            next_layer.insert(w);
                         }
                     }
                 }
@@ -189,8 +189,7 @@ namespace SortHeuristic {
             Q.pop();
             S.push(v);
 
-            for (const auto &node: g.adjlist[v].adjNodes) {
-                size_t w = node.id;
+            for (unsigned int w: g.adjlist[v].adjNodes) {
                 if (d[w] < 0) {
                     Q.push(w);
                     d[w] = d[v] + 1;
@@ -254,12 +253,12 @@ namespace SortHeuristic {
             }
             temp[u] = infinity;                //Assigning INFINITY to the data structure already visited to find the next minimum L
             for (int k = 0; k < (int) g.adjlist[u].adjNodes.size(); k++) {
-                const Node *w = &g.adjlist[u].adjNodes[k];
-                if (!T[w->id]) {       // if w Exist in T, proceed
-                    if (L[w->id] > L[u] + 1) {
-                        L[w->id] = L[u] + 1; // w is closer to s by using u;
-                        temp[w->id] = L[w->id];
-                        father[w->id] = u;
+                unsigned int w = g.adjlist[u].adjNodes[k];
+                if (!T[w]) {       // if w Exist in T, proceed
+                    if (L[w] > L[u] + 1) {
+                        L[w] = L[u] + 1; // w is closer to s by using u;
+                        temp[w] = L[w];
+                        father[w] = u;
                     }
                 }
             }

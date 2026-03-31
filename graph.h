@@ -9,7 +9,7 @@ struct Node {
     unsigned int id;
     unsigned int original_id;
     unsigned int label;
-    std::vector<Node> adjNodes;
+    std::vector<unsigned int> adjNodes;
 
     Node(unsigned int id, unsigned int label);
 };

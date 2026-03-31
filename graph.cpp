@@ -25,13 +25,14 @@ Graph::Graph(unsigned int n) {
     this->e = -1;
     for (unsigned int i = 0; i < n; ++i)
         adjlist.emplace_back(i, 0);
-    leaves = std::vector<std::vector<std::pair<std::pair<unsigned int, unsigned int>, std::vector<int>>>> (n);
+    leaves = std::vector<std::vector<
+        std::pair<std::pair<unsigned int, unsigned int>, std::vector<int>>>>(n);
 }
 
 unsigned int Graph::get(const int u, const int v) const {
     if (u < this->n) {
-        for (auto &edge : this->adjlist[u].adjNodes) {
-            if (static_cast<int>(edge.id) == v) {
+        for (auto edge : this->adjlist[u].adjNodes) {
+            if (static_cast<int>(edge) == v) {
                 return 1;
             }
         }
@@ -43,16 +44,17 @@ void Graph::pack_leaves() {
     std::vector<int> deg(this->n, 0);
 
     for (int i = 0; i < this->n; i++)
-        deg[i] += (int) this->adjlist[i].adjNodes.size();
+        deg[i] += (int)this->adjlist[i].adjNodes.size();
 
     for (int u = 0; u < this->n; u++) {
-        for (auto v: this->adjlist[u].adjNodes)
-            if (deg[v.id] == 1) {
-                std::pair<unsigned int, unsigned int> labels(1, this->adjlist[v.id].label);
+        for (auto v : this->adjlist[u].adjNodes) {
+            if (deg[v] == 1) {
+                std::pair<unsigned int, unsigned int> labels(1, this->adjlist[v].label);
                 int pos = -1;
                 for (int k = 0;; k++) {
                     if (k == int(this->leaves[u].size())) {
-                        this->leaves[u].push_back(std::make_pair(labels, std::vector<int>()));
+                        this->leaves[u].push_back(
+                            std::make_pair(labels, std::vector<int>()));
                     }
                     if (this->leaves[u][k].first == labels) {
                         pos = k;
@@ -60,26 +62,28 @@ void Graph::pack_leaves() {
                     }
                 }
                 //            assert(pos != -1);
-                this->leaves[u][pos].second.push_back(v.id);
+                this->leaves[u][pos].second.push_back(v);
             }
+        }
         sort(this->leaves[u].begin(), this->leaves[u].end());
     }
 }
 
 Graph induced_subgraph(struct Graph &g, std::vector<int> vv) {
-    Graph subg(g.n);
+  Graph subg(g.n);
 
 #pragma omp parallel for
     for (int i = 0; i < subg.n; ++i) {
         subg.adjlist[i] = g.adjlist[vv[i]];
         subg.adjlist[i].id = i;
-        for (int j = 0; j < (int) subg.adjlist[i].adjNodes.size(); ++j) {
-            subg.adjlist[i].adjNodes[j].id =
-                    std::find(vv.begin(), vv.end(), subg.adjlist[i].adjNodes[j].id) - vv.begin();
+        for (int j = 0; j < (int)subg.adjlist[i].adjNodes.size(); ++j) {
+            subg.adjlist[i].adjNodes[j] =
+                std::find(vv.begin(), vv.end(), subg.adjlist[i].adjNodes[j]) -
+                vv.begin();
         }
 
-        std::stable_sort(std::begin(subg.adjlist[i].adjNodes), std::end(subg.adjlist[i].adjNodes),
-                         [&](Node a, Node b) { return a.id < b.id; });
+        std::stable_sort(std::begin(subg.adjlist[i].adjNodes),
+                        std::end(subg.adjlist[i].adjNodes));
     }
 
     subg.e = g.e;
@@ -92,8 +96,8 @@ void add_edge(Graph &g, int v, int w, bool directed = false, unsigned int val = 
             std::cerr << "Error: this McSplit only supports undirected graphs with val=1" << std::endl;
             exit(1);
         } else {
-            g.adjlist[v].adjNodes.push_back(Node(w, 0));
-            g.adjlist[w].adjNodes.push_back(Node(v, 0));
+            g.adjlist[v].adjNodes.push_back(w);
+            g.adjlist[w].adjNodes.push_back(v);
         }
     } else {
         // To indicate that a vertex has a loop, we set the most
@@ -102,9 +106,9 @@ void add_edge(Graph &g, int v, int w, bool directed = false, unsigned int val = 
     }
 }
 
-int Graph::computeNumEdges(){
+int Graph::computeNumEdges() {
     int nedges = 0;
-    for (int i=0; i<this->n; i++)
+    for (int i = 0; i < this->n; i++)
         nedges += this->adjlist[i].adjNodes.size();
     this->e = nedges;
     return nedges;
@@ -113,13 +117,14 @@ int Graph::computeNumEdges(){
 /**
  * @return density = 2E / n(n-1)
  */
-float Graph::computeDensity(){
+float Graph::computeDensity() {
     if (this->e < 0)
         this->computeNumEdges();
-    return 2*float(this->e)/float(this->n*(this->n-1));
+    return 2 * float(this->e) / float(this->n * (this->n - 1));
 }
 
-struct Graph readDimacsGraph(char *filename, bool directed, bool vertex_labelled) {
+struct Graph readDimacsGraph(char *filename, bool directed,
+                             bool vertex_labelled) {
     struct Graph g(0);
 
     FILE *f;
@@ -200,7 +205,7 @@ int read_word(FILE *fp) {
     unsigned char a[2];
     if (fread(a, 1, 2, fp) != 2)
         fail("Error reading file.\n");
-    return (int) a[0] | (((int) a[1]) << 8);
+    return (int)a[0] | (((int)a[1]) << 8);
 }
 
 struct Graph readBinaryGraph(char *filename, bool directed, bool edge_labelled,
@@ -226,17 +231,17 @@ struct Graph readBinaryGraph(char *filename, bool directed, bool edge_labelled,
         k1 = k2;
         k2++;
     }
-    //std::cout << "labelled: " << vertex_labelled << std::endl;
+    // std::cout << "labelled: " << vertex_labelled << std::endl;
     for (int i = 0; i < nvertices; i++) {
         int label = (read_word(f) >> (16 - k1));
-        //std::cout << "label: " << label << std::endl;
+        // std::cout << "label: " << label << std::endl;
         if (vertex_labelled)
             g.adjlist[i].label |= label;
     }
-    //std::cout << "edge_labelled: " << edge_labelled << std::endl;
+    // std::cout << "edge_labelled: " << edge_labelled << std::endl;
     for (int i = 0; i < nvertices; i++) {
         int len = read_word(f);
-        //std::cout << "len: " << len << std::endl;
+        // std::cout << "len: " << len << std::endl;
         for (int j = 0; j < len; j++) {
             int target = read_word(f);
             int label = (read_word(f) >> (16 - k1)) + 1;

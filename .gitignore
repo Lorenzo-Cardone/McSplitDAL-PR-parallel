@@ -10,3 +10,4 @@ mcsplit-dal
 run_ascii*
 profiling/
 gmon.out
+.clang-format

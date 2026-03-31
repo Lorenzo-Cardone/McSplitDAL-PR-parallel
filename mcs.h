@@ -16,6 +16,12 @@
 using namespace std;
 using gtype = double;
 
+struct alignas(64) ThreadStats {
+    long long work_time_us = 0;
+    unsigned int best_sol_found = 0;
+    unsigned long long steps_explored = 0;
+};
+
 struct VtxPair {
     int v;
     int w;
@@ -35,36 +41,28 @@ struct Bidomain {
 };
 
 struct NewBidomainResult {
-    vector<Bidomain> *new_domains;
+    std::unique_ptr<vector<Bidomain>> new_domains;
     int reward;
 
-    NewBidomainResult(vector<Bidomain> *new_domains, int reward): new_domains(new_domains), reward(reward) {}
-
+    NewBidomainResult(std::unique_ptr<vector<Bidomain>> new_domains, int reward)
+        : new_domains(std::move(new_domains)), reward(reward) {}
 };
 
 struct Step {
-    vector<Bidomain> *domains;
+    std::unique_ptr<vector<Bidomain>> domains;
     unordered_set<int> wselected;
     int w_iter;
-    Bidomain *bd;
     int bd_idx;
     int v;
-    vector<VtxPair> *current;
+    std::unique_ptr<vector<VtxPair>> current;
 
-    Step(vector<Bidomain> *domains, int w_iter, int v, vector<VtxPair> *current) {
-        this->wselected = unordered_set<int>();
-        this->domains = domains;
-        this->w_iter = w_iter;
-        this->v = v;
-        this->current = current;
-        this->bd = nullptr;
-        this->bd_idx = -1;
-    };
-
-    ~Step() {
-        delete this->domains;
-        delete this->current;
-    }
+    Step(std::unique_ptr<vector<Bidomain>> domains, int w_iter, int v, std::unique_ptr<vector<VtxPair>> current)
+        : domains(std::move(domains)),
+          wselected(),
+          w_iter(w_iter),
+          bd_idx(-1),
+          v(v),
+          current(std::move(current)) {}
 };
 
 vector<VtxPair> mcs(const Graph &g0, const Graph &g1, void *rewards_p, Stats *stats);
